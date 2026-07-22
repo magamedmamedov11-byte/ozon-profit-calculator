@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор прибыли · Ozon FBS</title>
+  <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+      :root{
+            --bg:#12151A;
+            --surface:#1B2028;
+            --surface-2:#232A34;
+            --line:#2E3641;
+            --amber:#F0A93E;
+            --amber-dim:#8A6526;
+            --green:#4FC08D;
+            --red:#E5595F;
+            --tg:#2AABEE;
+            --text:#E9EBEF;
+            --muted:#8B93A1;
+            --mono:'JetBrains Mono', monospace;
+            --display:'Space Grotesk', sans-serif;
+            --body:'Inter', sans-serif;
+      }
+      *{box-sizing:border-box;}
+      body{
+            margin:0;
+            background:var(--bg);
+            color:var(--text);
+            font-family:var(--body);
+            -webkit-font-smoothing:antialiased;
+      }
+      .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 90px;position:relative;}
+
+      .tg-corner{
+            position:fixed;top:18px;right:18px;z-index:50;
+            display:flex;align-items:center;gap:8px;
+            background:var(--surface);border:1px solid var(--tg);
+            padding:9px 14px 9px 10px;border-radius:999px;
+            text-decoration:none;color:var(--text);
+            font-size:13px;font-weight:500;
+            box-shadow:0 4px 16px rgba(0,0,0,.35);
+            transition:transform .15s, background .15s;
+      }
+      .tg-corner:hover{transform:translateY(-1px);background:var(--surface-2);}
+      .tg-corner svg{width:18px;height:18px;flex-shrink:0;}
+      .tg-corner .lbl{display:flex;flex-direction:column;line-height:1.2;}
+      .tg-corner .lbl small{color:var(--muted);font-size:10.5px;font-weight:400;}
+      @media (max-width:600px){
+            .tg-corner{top:10px;right:10px;padding:8px 10px;}
+            .tg-corner .lbl small{display:none;}
+      }
+
+      header.top{
+            display:flex;flex-direction:column;gap:10px;
+            padding-bottom:24px;margin-bottom:24px;
+            border-bottom:1px solid var(--line);
+            padding-right:130px;
+      }
+      @media (max-width:600px){ header.top{padding-right:20px;} }
+      .eyebrow{
+            font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+            text-transform:uppercase;color:var(--amber);
+      }
+      h1{
+            font-family:var(--display);font-size:clamp(26px,4vw,38px);
+            margin:0;font-weight:700;line-height:1.1;
+      }
+      .sub{color:var(--muted);font-size:14.5px;max-width:640px;line-height:1.55;}
+
+      .disclaimer{
+            background:var(--surface);border:1px solid var(--amber-dim);
+            border-left:3px solid var(--amber);
+            border-radius:6px;padding:14px 16px;margin-bottom:28px;
+            font-size:13.5px;line-height:1.6;color:var(--text);
+      }
+      .disclaimer b{color:var(--amber);}
+      .disclaimer a{color:var(--amber);text-decoration:underline;}
+
+      .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
+      @media (max-width:880px){ .grid{grid-template-columns:1fr;} }
+
+      .card{
+            background:var(--surface);border:1px solid var(--line);
+            border-radius:10px;padding:20px 22px;margin-bottom:18px;
+      }
+      .card h2{
+            font-family:var(--display);font-size:15px;margin:0 0 4px;
+            display:flex;align-items:center;gap:8px;
+      }
+      .step-no{
+            font-family:var(--mono);font-size:11px;color:var(--bg);
+            background:var(--amber);width:20px;height:20px;border-radius:4px;
+            display:inline-flex;align-items:center;justify-content:center;font-weight:700;
+      }
+      .card .hint{color:var(--muted);font-size:12.5px;margin:0 0 16px;line-height:1.5;}
+      .card .hint a{color:var(--amber);}
+
+      .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+      .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+      @media (max-width:520px){ .row,.row3{grid-template-columns:1fr;} }
+
+      label{
+            display:block;font-size:12px;color:var(--muted);margin-bottom:5px;
+            font-family:var(--mono);
+      }
+      input[type=number]{
+            width:100%;background:var(--surface-2);border:1px solid var(--line);
+            color:var(--text);padding:9px 10px;border-radius:6px;
+            font-family:var(--mono);font-size:14px;outline:none;
+            transition:border-color .15s;
+      }
+      input[type=number]:focus{border-color:var(--amber);}
+
+      .computed{
+            background:var(--surface-2);border:1px dashed var(--line);
+            border-radius:6px;padding:10px 12px;margin-top:6px;
+            font-family:var(--mono);font-size:13px;color:var(--amber);
+            display:flex;justify-content:space-between;
+      }
+      .computed span:first-child{color:var(--muted);font-weight:400;}
+
+      .link-btn{
+            display:inline-flex;align-items:center;gap:6px;
+            font-size:12.5px;color:var(--amber);text-decoration:none;
+            border:1px solid var(--amber-dim);padding:6px 10px;border-radius:6px;
+            margin-top:4px;transition:background .15s;
+      }
+      .link-btn:hover{background:rgba(240,169,62,.1);}
+
+      .summary{
+            position:sticky;top:20px;background:var(--surface);
+            border:1px solid var(--line);border-radius:10px;overflow:hidden;
+      }
+      .summary .head{
+            padding:18px 20px;border-bottom:1px solid var(--line);
+            background:var(--surface-2);
+      }
+      .summary .head .eyebrow{margin-bottom:4px;}
+      .summary .head .big{
+            font-family:var(--display);font-size:34px;font-weight:700;
+      }
+      .summary .head .big.neg{color:var(--red);}
+      .summary .head .big.pos{color:var(--green);}
+      .summary .metrics{display:flex;gap:18px;margin-top:8px;}
+      .summary .metrics div{font-family:var(--mono);font-size:12.5px;color:var(--muted);}
+      .summary .metrics b{color:var(--text);font-size:14px;display:block;}
+
+      .waterfall{padding:16px 20px 4px;}
+      .wf-row{
+            display:flex;justify-content:space-between;align-items:center;
+            padding:7px 0;font-size:13px;border-bottom:1px solid var(--line);
+            font-family:var(--mono);
+      }
+      .wf-row:last-child{border-bottom:none;}
+      .wf-row .lbl{color:var(--muted);}
+      .wf-row .val{color:var(--text);}
+      .wf-row.minus .val::before{content:'\2212\00a0';color:var(--red);}
+      .wf-row.total{
+            margin-top:6px;padding-top:12px;border-top:1px solid var(--amber-dim);
+            font-weight:700;
+      }
+      .wf-row.total .lbl{color:var(--text);}
+      .wf-row.total .val{color:var(--amber);font-size:15px;}
+
+      .summary .ask{
+            margin:14px 20px 20px;padding:14px;border-radius:8px;
+            background:rgba(42,171,238,.08);border:1px solid rgba(42,171,238,.3);
+            font-size:12.5px;line-height:1.5;color:var(--text);
+      }
+      .summary .ask a{
+            color:var(--tg);font-weight:600;text-decoration:none;
+      }
+      .summary .ask a:hover{text-decoration:underline;}
+
+      footer{margin-top:30px;color:var(--muted);font-size:12px;text-align:center;}
+    </style>
+  </head>
+  <body>
+
+    <a class="tg-corner" href="https://t.me/Ali_Seller_MP" target="_blank" rel="noopener">
+        <svg viewBox="0 0 240 240" fill="none"><circle cx="120" cy="120" r="120" fill="#2AABEE"/><path fill="#fff" d="M170 72l-19 91c-1.4 6.4-5.3 8-10.7 5l-30-22-14.5 14c-1.6 1.6-3 3-6 3l2-30 55-50c2.4-2 -0.5-3.2-3.7-1.2l-68 43-29-9c-6.3-2-6.5-6.3 1.4-9.3l114-44c5.3-2 10 1.3 8.5 9.5z"/></svg>svg>
+        <span class="lbl">Есть вопросы? <small>Пишите в Telegram</small></span>span>
+    </a>a>
+  
+  <div class="wrap">
+  
+    <header class="top">
+        <div class="eyebrow">FBS · Юнит-экономика</div>div>
+        <h1>Калькулятор чистой прибыли Ozon</h1>
+        <p class="sub">Объём считается автоматически по габаритам. Ставки комиссии и логистики вбиваются вручную — Ozon меняет их несколько раз в год и держит полную таблицу тарифов только в личном кабинете продавца.</p>p>
+    </header>header>
+  
+    <div class="disclaimer">
+        <b>Важно:</b> точные ставки по вашей категории и маршруту берите в личном кабинете Ozon Seller → «Финансы → Тарифы», либо в официальном калькуляторе. Ozon менял тарифы в апреле 2026 и анонсировал новое повышение на август–сентябрь 2026 — сверяйтесь перед расчётом.
+        <br><br>
+        <a href="https://calculator.ozon.ru/" target="_blank" rel="noopener">→ Официальный калькулятор Ozon (calculator.ozon.ru)</a>a><br>
+        <a href="https://seller-edu.ozon.ru/libra/commissions-tariffs/commissions-tariffs-ozon" target="_blank" rel="noopener">→ Документация Ozon по комиссиям и тарифам</a>a>
+    </div>div>
+  
+    <div class="grid">
+        <div>
+
+                <div class="card">
+                          <h2><span class="step-no">1</span>span> Габариты и объём</h2>
+                          <p class="hint">Введите размеры упаковки в сантиметрах — литраж считается автоматически (Д×Ш×В / 1000). Это ровно та же цифра, которую использует Ozon для расчёта логистики.</p>p>
+                          <div class="row3">
+                                      <div><label>Длина, см</label><input type="number" id="dimL" value="24" min="0" step="0.1"></div>
+                                    <div><label>Ширина, см</label><input type="number" id="dimW" value="16" min="0" step="0.1"></div>
+                                    <div><label>Высота, см</label><input type="number" id="dimH" value="8" min="0" step="0.1"></div>
+                          </div>
+                        <div class="computed"><span>Объём</span><span id="outVolume">0.00 л</span></div>
+                </div>
+        
+              <div class="card">
+                      <h2><span class="step-no">2</span>span> Логистика (кроссдокинг + последняя миля)</h2>
+                      <p class="hint">Найдите тариф для вашего маршрута (склад отгрузки → кластер покупателя) и вашего объёма в личном кабинете и впишите итоговые суммы ниже. <a href="https://seller-edu.ozon.ru/libra/commissions-tariffs/commissions-tariffs-ozon/rashody-na-dostavku" target="_blank" rel="noopener">Открыть тарифы логистики →</a>a></p>p>
+                      <div class="row">
+                                <div><label>Магистраль + кроссдокинг, ₽</label><input type="number" id="logCross" value="60" min="0" step="0.1"></div>
+                                <div><label>Последняя миля, ₽</label><input type="number" id="logLastMile" value="35" min="0" step="0.1"></div>
+                      </div>
+                      <div class="row">
+                                <div><label>Обработка отправления (СЦ/ПВЗ), ₽</label><input type="number" id="logProcessing" value="15" min="0" step="0.1"></div>
+                                <div><label>Наценка за нелокальность, ₽</label><input type="number" id="logNonLocal" value="0" min="0" step="0.1"></div>
+                      </div>
+              </div>
+        
+              <div class="card">
+                      <h2><span class="step-no">3</span>span> Комиссия Ozon</h2>
+                      <p class="hint">Комиссия зависит от категории товара (диапазон ориентировочно 8–55%) и не зависит от схемы FBO/FBS. Найдите свою категорию в калькуляторе Ozon и впишите процент. <a href="https://calculator.ozon.ru/" target="_blank" rel="noopener">Найти комиссию по категории →</a>a></p>p>
+                      <div class="row">
+                                <div><label>Комиссия за продажу, %</label><input type="number" id="commissionPct" value="27" min="0" max="100" step="0.1"></div>
+                                <div><label>Эквайринг, %</label><input type="number" id="acquiringPct" value="1.5" min="0" max="100" step="0.1"></div>
+                      </div>
+                      <div class="row">
+                                <div><label>Резерв на возвраты/невыкуп, %</label><input type="number" id="returnsPct" value="3" min="0" max="100" step="0.1"></div>
+                                <div></div>
+                      </div>
+              </div>
+        
+              <div class="card">
+                      <h2><span class="step-no">4</span>span> Себестоимость и остальные расходы</h2>
+                      <p class="hint">Всё, что калькулятор Ozon не считает за вас — закупка, упаковка, реклама и налог.</p>p>
+                      <div class="row">
+                                <div><label>Цена продажи за 1 шт, ₽</label><input type="number" id="salePrice" value="1200" min="0" step="1"></div>
+                                <div><label>Количество в заказе, шт</label><input type="number" id="qty" value="1" min="1" step="1"></div>
+                      </div>
+                      <div class="row">
+                                <div><label>Себестоимость закупки за 1 шт, ₽</label><input type="number" id="costPrice" value="450" min="0" step="1"></div>
+                                <div><label>Упаковка/маркировка за 1 шт, ₽</label><input type="number" id="packagingCost" value="20" min="0" step="1"></div>
+                      </div>
+                      <div class="row">
+                                <div><label>Реклама за 1 шт, ₽</label><input type="number" id="adCost" value="30" min="0" step="1"></div>
+                                <div><label>Налог, % от выручки</label><input type="number" id="taxPct" value="6" min="0" max="100" step="0.1"></div>
+                      </div>
+              </div>
+        
+        </div>
+    
+        <div class="summary">
+              <div class="head">
+                      <div class="eyebrow">Итог</div>
+                      <div class="big" id="netProfitBig">0 ₽</div>
+                      <div class="metrics">
+                                <div>Маржа<b id="marginOut">0%</b>b></div>
+                                <div>ROI<b id="roiOut">0%</b>b></div>
+                                <div>На выплату<b id="payoutOut">0 ₽</b>b></div>
+                      </div>
+              </div>
+              <div class="waterfall" id="waterfall"></div>
+              <div class="ask">
+                      Не сошлось с реальной выплатой или есть вопрос по расчёту? Пишите — <a href="https://t.me/Ali_Seller_MP" target="_blank" rel="noopener">t.me/Ali_Seller_MP</a>a>
+              </div>
+        </div>
+    </div>
+  
+    <footer>Формула не хранит тарифы — только математику. Обновляйте ставки комиссии/логистики при их изменении на Ozon.</footer>
+  </div>
+  
+  <script>
+    function num(id){ return parseFloat(document.getElementById(id).value) || 0; }
+    function fmt(n){ return n.toLocaleString('ru-RU',{maximumFractionDigits:2}) + ' ₽'; }
+    function fmtPct(n){ return n.toLocaleString('ru-RU',{maximumFractionDigits:2}) + '%'; }
+
+    function recalc(){
+        const L = num('dimL'), W = num('dimW'), H = num('dimH');
+        const volumeL = (L*W*H)/1000;
+        document.getElementById('outVolume').textContent = volumeL.toFixed(2) + ' л';
+
+        const salePrice = num('salePrice');
+        const qty = Math.max(1, num('qty'));
+        const costPrice = num('costPrice');
+        const packagingCost = num('packagingCost');
+        const adCost = num('adCost');
+        const taxPct = num('taxPct');
+
+        const commissionPct = num('commissionPct');
+        const acquiringPct = num('acquiringPct');
+        const returnsPct = num('returnsPct');
+
+        const logCross = num('logCross');
+        const logLastMile = num('logLastMile');
+        const logProcessing = num('logProcessing');
+        const logNonLocal = num('logNonLocal');
+
+        const revenue = salePrice * qty;
+
+        const commissionAmount = revenue * (commissionPct/100);
+        const logisticsAmount = logCross + logLastMile + logProcessing + logNonLocal;
+        const acquiringAmount = revenue * (acquiringPct/100);
+        const returnsAmount = revenue * (returnsPct/100);
+
+        const payout = revenue - commissionAmount - logisticsAmount - acquiringAmount;
+
+        const costOfGoods = (costPrice + packagingCost) * qty;
+        const advertisingAmount = adCost * qty;
+        const taxAmount = revenue * (taxPct/100);
+
+        const netProfit = payout - returnsAmount - costOfGoods - advertisingAmount - taxAmount;
+
+        const marginPct = revenue > 0 ? (netProfit/revenue)*100 : 0;
+        const roiPct = costOfGoods > 0 ? (netProfit/costOfGoods)*100 : 0;
+
+        const bigEl = document.getElementById('netProfitBig');
+        bigEl.textContent = fmt(netProfit);
+        bigEl.className = 'big ' + (netProfit >= 0 ? 'pos' : 'neg');
+        document.getElementById('marginOut').textContent = fmtPct(marginPct);
+        document.getElementById('roiOut').textContent = fmtPct(roiPct);
+        document.getElementById('payoutOut').textContent = fmt(payout);
+
+        const rows = [
+          {lbl:'Выручка ('+qty+' шт)', val: fmt(revenue), cls:''},
+          {lbl:'Комиссия Ozon ('+commissionPct+'%)', val: fmt(commissionAmount), cls:'minus'},
+          {lbl:'Логистика (кросс-док + миля + обработка)', val: fmt(logisticsAmount), cls:'minus'},
+          {lbl:'Эквайринг ('+acquiringPct+'%)', val: fmt(acquiringAmount), cls:'minus'},
+          {lbl:'К выплате от Ozon', val: fmt(payout), cls:'total'},
+          {lbl:'Резерв на возвраты ('+returnsPct+'%)', val: fmt(returnsAmount), cls:'minus'},
+          {lbl:'Себестоимость + упаковка', val: fmt(costOfGoods), cls:'minus'},
+          {lbl:'Реклама', val: fmt(advertisingAmount), cls:'minus'},
+          {lbl:'Налог ('+taxPct+'%)', val: fmt(taxAmount), cls:'minus'},
+          {lbl:'Чистая прибыль', val: fmt(netProfit), cls:'total'},
+            ];
+
+        const wf = document.getElementById('waterfall');
+        wf.innerHTML = rows.map(r => `
+            <div class="wf-row ${r.cls}">
+                  <span class="lbl">${r.lbl}</span>
+                        <span class="val">${r.val}</span>
+                            </div>
+                              `).join('');
+    }
+
+    document.querySelectorAll('input').forEach(el => el.addEventListener('input', recalc));
+    recalc();
+  </script>
+  </body>
+</html>html>
+
+  </script></footer></h2></h2></span></label></label></div>
+        </div></b></h1></small>
+  </body>
+  </style></title>
+  </head>
